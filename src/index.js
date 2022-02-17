@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let quoteArr = []
 let likeId = 2
-let created = 1558524358
 const quoteList = document.querySelector('ul#quote-list')
 
 let getAllQuotes = () => {
@@ -52,44 +51,58 @@ let renderEachQuote = (input) => {
   //----------- HANDLE SUCCESS BUTTON --------------// 
   btnSuc.addEventListener('click', (e) => {
     let times = e.target.textContent.split(' ')
+    // const currentQuoteId = e.target.parentNod.id
+    // console.log('e.target.parentNode:', e.target.parentNode)
     times[1] = Number(times[1]) + 1
     btnSuc.innerHTML = `Likes: <span>${times[1]}</span>`
 
+    let currentTime = Math.round((new Date()).getTime() / 1000);
     let incrementLikeId = () => likeId += 1
-    let incrementRandNum = () => created += randNum()
-    let randNum = () => Math.floor(Math.random() * (100 - 1) + 1)
-
+    
     let likeObj = {
       id: incrementLikeId(),
       quotedId: input.id,
-      createdAt: incrementRandNum()
+      createdAt: currentTime
     }
+
+    // console.log('typeof likeObj.id:', typeof(likeObj.quotedId));
+    console.log('likeObj:', likeObj);
     input.likes.push(likeObj)
-    // updateBackEnd(input.likes)
-    console.log(input.likes)
+    updateBackEnd(likeObj)
+    console.log('input.likes:', input.likes)
   })
 
   //------------ HANDLE DELETE BUTTON ---------------//
   btnDan.addEventListener('click', (e) => { 
     e.target.parentNode.remove() 
-    const id = e.target.parentNode.id 
-    // console.log('quoteArr before update:', quoteArr); 
-    
+    const targetId = e.target.parentNode.id     
     quoteArr = quoteArr.filter(quote => {
-      quote.id != id    
-    }) 
-    // console.log('quoteArr after update:', quoteArr);    
+      quote.id != targetId    
+    })   
+    updateRemoveList(targetId)  
   }) 
   card.append(blockquote, p, footer, br, btnSuc, btnDan)
   quoteList.appendChild(card)
 }
 
-function updateRemoveList(item) {
-  fetch(`http://localhost:3000/quotes/${item.id}`, {
+function updateRemoveList(id) {
+  fetch(`http://localhost:3000/quotes/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
     }
+  })
+  .then(res => res.json())
+  .then(data => console.log(data))
+}
+
+function updateBackEnd(obj) {
+  fetch(`http://localhost:3000/likes`, {
+    method:'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(obj)
   })
   .then(res => res.json())
   .then(data => console.log(data))
