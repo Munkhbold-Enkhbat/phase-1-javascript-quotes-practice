@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   getAllQuotes()
+  submitForm()
 })
 
 let quoteArr = []
 let likeId = 2
-const quoteList = document.querySelector('ul#quote-list')
+let quoteList = document.querySelector('ul#quote-list')
+const newQuote = document.querySelector('form#new-quote-form')
 
 let getAllQuotes = () => {
   fetch('http://localhost:3000/quotes?_embed=likes')
@@ -21,7 +23,11 @@ let setClass = (el, name) => el.className = name
 let setContent = (el, content) => el.textContent = content
 
 let renderEachQuote = (input) => {
+  // console.log(input)
+  createCard(input) 
+}
 
+function createCard(input) {
   /*********** CREATE ELEMENTS FOR EACH CARD *******/
   const card = makeEl('li')
   const blockquote = makeEl('blockquote')
@@ -107,3 +113,36 @@ function updateBackEnd(obj) {
   .then(res => res.json())
   .then(data => console.log(data))
 }
+
+function submitForm() {
+  // const lastQuoteId = quoteArr[length-1].id
+  console.log("quoteArr", quoteArr)
+  // debugger
+  newQuote.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const quoteObject = {
+      quote: e.target.quote.value,
+      author: e.target.author.value, 
+      likes:[]
+    }
+    console.log(quoteObject)
+    addNewQuoteToBackEnd(quoteObject)
+    // debugger
+    quoteList = ''
+    console.log('quoteList:', quoteList);
+    getAllQuotes()
+  })
+}
+
+function addNewQuoteToBackEnd(quoteObj) {
+  fetch('http://localhost:3000/quotes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(quoteObj)
+  })
+  .then(res => res.json())
+  .then(data => console.log('Quotes from BE:', data))
+}
+
